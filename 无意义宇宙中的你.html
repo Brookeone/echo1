@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>无意义宇宙中的你</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    background: #07091A;
+    color: #E0E2F0;
+    font-family: 'Noto Serif SC', 'Source Han Serif CN', 'STSong', 'SimSun', serif;
+    overflow-x: hidden;
+  }
+
+  #stars-canvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #app {
+    position: relative;
+    z-index: 1;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeIn 0.5s ease forwards; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to   { opacity: 0; transform: translateY(-12px); }
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0); }
+    50%      { transform: translateY(-10px); }
+  }
+  @keyframes planetReveal {
+    from { opacity: 0; transform: scale(0.65); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  @keyframes twinkle {
+    0%,100% { opacity: 0.15; }
+    50%      { opacity: 0.9; }
+  }
+
+  /* ─── INTRO ─── */
+  .intro-orb-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+    animation: float 5s ease-in-out infinite;
+  }
+  .intro-orb {
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 32%, #8899CC, #111A3A);
+    box-shadow: 0 0 40px #2244AA88, 0 0 12px #3355AA66;
+  }
+  h1.title {
+    font-size: 1.7rem;
+    font-weight: 300;
+    letter-spacing: .18em;
+    text-align: center;
+    color: #D8DCF0;
+    margin-bottom: .4rem;
+  }
+  .subtitle {
+    text-align: center;
+    color: #4A5878;
+    font-size: .82rem;
+    letter-spacing: .14em;
+    margin-bottom: 2.5rem;
+  }
+  .intro-box {
+    background: rgba(255,255,255,.03);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 14px;
+    padding: 1.4rem 1.6rem;
+    margin-bottom: 2rem;
+    line-height: 2.1;
+    color: #7880A0;
+    font-size: .9rem;
+  }
+  .intro-box p { margin-bottom: .5rem; }
+  .intro-box p:last-child { margin-bottom: 0; }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 2.2rem;
+  }
+  .tag {
+    padding: 5px 14px;
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 20px;
+    font-size: .75rem;
+    color: #404868;
+  }
+  .btn-start {
+    display: block;
+    margin: 0 auto;
+    padding: .9rem 2.8rem;
+    border: 1px solid rgba(255,255,255,.28);
+    background: transparent;
+    color: #D8DCF0;
+    border-radius: 40px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: .95rem;
+    letter-spacing: .1em;
+    transition: all .25s;
+  }
+  .btn-start:hover {
+    background: rgba(255,255,255,.1);
+    border-color: rgba(255,255,255,.5);
+  }
+
+  /* ─── QUIZ ─── */
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2.2rem;
+  }
+  .progress-bar-bg {
+    flex: 1;
+    height: 2px;
+    background: rgba(255,255,255,.08);
+    border-radius: 1px;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: rgba(255,255,255,.38);
+    border-radius: 1px;
+    transition: width .45s ease;
+  }
+  .progress-label {
+    color: #3A4870;
+    font-size: .75rem;
+    letter-spacing: .12em;
+    white-space: nowrap;
+  }
+  .signal-label {
+    color: #3A4870;
+    font-size: .7rem;
+    letter-spacing: .22em;
+    margin-bottom: 1rem;
+  }
+  .question-text {
+    font-size: 1.18rem;
+    font-weight: 400;
+    line-height: 1.8;
+    margin-bottom: 2rem;
+    color: #D8DCF0;
+    letter-spacing: .04em;
+  }
+  .choice-btn {
+    width: 100%;
+    padding: 1.2rem 1.5rem;
+    border: 1px solid rgba(255,255,255,.1);
+    background: rgba(255,255,255,.025);
+    color: #B0B4CC;
+    border-radius: 13px;
+    cursor: pointer;
+    text-align: left;
+    font-size: .95rem;
+    font-family: inherit;
+    line-height: 1.65;
+    transition: all .22s;
+    margin-bottom: 12px;
+    display: block;
+  }
+  .choice-btn:hover {
+    background: rgba(255,255,255,.07);
+    border-color: rgba(255,255,255,.26);
+    color: #E0E2F0;
+    transform: translateX(5px);
+  }
+  .choice-letter {
+    display: block;
+    color: #3A4870;
+    font-size: .68rem;
+    letter-spacing: .18em;
+    margin-bottom: .35rem;
+  }
+
+  /* ─── RESULT ─── */
+  .result-eyebrow {
+    text-align: center;
+    color: #303858;
+    font-size: .7rem;
+    letter-spacing: .22em;
+    margin-bottom: 1.6rem;
+  }
+  .planet-orb-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.3rem;
+  }
+  .planet-orb {
+    width: 96px; height: 96px;
+    border-radius: 50%;
+    animation: planetReveal .8s ease forwards, float 6s ease-in-out .8s infinite;
+  }
+  .planet-name {
+    font-size: 1.9rem;
+    font-weight: 300;
+    letter-spacing: .14em;
+    text-align: center;
+    color: #D8DCF0;
+    margin-bottom: .3rem;
+  }
+  .planet-subtitle {
+    text-align: center;
+    font-size: .88rem;
+    letter-spacing: .16em;
+    margin-bottom: 2rem;
+  }
+  .info-box {
+    background: rgba(255,255,255,.03);
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 13px;
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 1.3rem;
+  }
+  .desc-text {
+    color: #6070A0;
+    font-size: .83rem;
+    line-height: 1.9;
+  }
+  .traits-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 1.4rem;
+  }
+  .trait-tag {
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: .76rem;
+  }
+  .profile-box {
+    background: rgba(255,255,255,.025);
+    border: 1px solid rgba(255,255,255,.065);
+    border-radius: 13px;
+    padding: 1.5rem 1.6rem;
+    margin-bottom: 1.4rem;
+  }
+  .profile-text {
+    color: #8890B0;
+    font-size: .88rem;
+    line-height: 2.1;
+    white-space: pre-wrap;
+  }
+  .second-planet-box {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    background: rgba(255,255,255,.02);
+    border: 1px solid rgba(255,255,255,.055);
+    border-radius: 11px;
+    padding: .9rem 1.2rem;
+    margin-bottom: 1.4rem;
+  }
+  .second-orb {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .second-label {
+    font-size: .68rem;
+    color: #303858;
+    letter-spacing: .14em;
+    margin-bottom: 2px;
+  }
+  .second-name {
+    font-size: .88rem;
+    color: #8890B0;
+  }
+  .btn-mystery {
+    width: 100%;
+    padding: .85rem;
+    border-radius: 11px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: .86rem;
+    letter-spacing: .1em;
+    background: transparent;
+    transition: all .22s;
+    margin-bottom: 1rem;
+  }
+  .mystery-box {
+    border-radius: 11px;
+    padding: 1.6rem;
+    margin-bottom: 1.4rem;
+    animation: fadeIn .4s ease;
+  }
+  .mystery-text {
+    white-space: pre-wrap;
+    line-height: 2.2;
+    font-size: .9rem;
+    color: #7080A8;
+    letter-spacing: .05em;
+  }
+  .btn-restart {
+    display: block;
+    margin: .5rem auto 0;
+    background: transparent;
+    border: none;
+    color: #333858;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: .8rem;
+    letter-spacing: .12em;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .btn-restart:hover { color: #6070A0; }
+
+  @media (max-width: 480px) {
+    #app { padding: 2rem 1.1rem; }
+    h1.title { font-size: 1.35rem; }
+    .question-text { font-size: 1rem; }
+    .planet-name { font-size: 1.5rem; }
+    .planet-orb { width: 76px; height: 76px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<div id="app">
+
+  <!-- INTRO SCREEN -->
+  <div id="screen-intro" class="screen active">
+    <div class="intro-orb-wrap"><div class="intro-orb"></div></div>
+    <h1 class="title">无意义宇宙中的你</h1>
+    <p class="subtitle">NASA 发现了数千颗系外行星</p>
+    <div class="intro-box">
+      <p>接下来没有正确答案。</p>
+      <p>每一道题，请选择更接近你真实运行方式的一边。</p>
+      <p>不要选择你希望成为的自己。</p>
+      <p>请选择你在深夜、疲惫、孤独、无人观看时，最接近的自己。</p>
+    </div>
+    <div class="tags">
+      <span class="tag">有些过热，有些冰冷</span>
+      <span class="tag">有些在宜居带边缘沉默运行</span>
+      <span class="tag">有些拥有海洋，却藏在冰层之下</span>
+      <span class="tag">有些被重新定义，却仍然完整</span>
+    </div>
+    <button class="btn-start" onclick="startQuiz()">以宇宙尺度，看见自己</button>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div id="screen-quiz" class="screen">
+    <div class="progress-row">
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <span class="progress-label" id="progress-label">01 / 24</span>
+    </div>
+    <p class="signal-label" id="signal-label">SIGNAL 01</p>
+    <p class="question-text" id="question-text"></p>
+    <button class="choice-btn" id="btn-a" onclick="answer('a')">
+      <span class="choice-letter">A</span>
+      <span id="text-a"></span>
+    </button>
+    <button class="choice-btn" id="btn-b" onclick="answer('b')">
+      <span class="choice-letter">B</span>
+      <span id="text-b"></span>
+    </button>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div id="screen-result" class="screen">
+    <p class="result-eyebrow">你的星球</p>
+    <div class="planet-orb-wrap">
+      <div class="planet-orb" id="result-orb"></div>
+    </div>
+    <p class="planet-name" id="result-name"></p>
+    <p class="planet-subtitle" id="result-subtitle"></p>
+    <div class="info-box">
+      <p class="desc-text" id="result-desc"></p>
+    </div>
+    <div class="traits-row" id="result-traits"></div>
+    <div class="profile-box">
+      <p class="profile-text" id="result-profile"></p>
+    </div>
+    <div class="second-planet-box" id="second-planet-box">
+      <div class="second-orb" id="second-orb"></div>
+      <div>
+        <p class="second-label">副星球</p>
+        <p class="second-name" id="second-name"></p>
+      </div>
+    </div>
+    <button class="btn-mystery" id="btn-mystery" onclick="toggleMystery()">展开奥秘</button>
+    <div class="mystery-box" id="mystery-box" style="display:none">
+      <p class="mystery-text" id="result-mystery"></p>
+    </div>
+    <button class="btn-restart" onclick="restart()">重新开始</button>
+  </div>
+
+</div>
+
+<script>
+// ─── STAR CANVAS ───────────────────────────────────────────
+const canvas = document.getElementById('stars-canvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+
+function initStars() {
+  stars = [];
+  for (let i = 0; i < 140; i++) {
+    stars.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.2 + 0.3,
+      alpha: Math.random(),
+      speed: Math.random() * 0.008 + 0.002,
+      dir: Math.random() > 0.5 ? 1 : -1,
+    });
+  }
+}
+
+function animateStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  stars.forEach(s => {
+    s.alpha += s.speed * s.dir;
+    if (s.alpha >= 1 || s.alpha <= 0) s.dir *= -1;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,255,255,${s.alpha.toFixed(2)})`;
+    ctx.fill();
+  });
+  requestAnimationFrame(animateStars);
+}
+
+window.addEventListener('resize', () => { resizeCanvas(); initStars(); });
+resizeCanvas();
+initStars();
+animateStars();
+
+// ─── DATA ──────────────────────────────────────────────────
+const PLANETS = {
+  "TOI-700 d": {
+    subtitle: "安静宜居者",
+    color: "#7C9885",
+    glow: "#7C988580",
+    bg: "rgba(124,152,133,0.12)",
+    desc: "NASA TESS 任务发现的一颗系外行星，位于宜居带内，安静运行在微妙的位置上。它不耀眼，却保存着一份尚未被证实的温柔。",
+    traits: ["轨道稳定", "低温持续", "不急证明"],
+    profile: `如果你的星球是 TOI-700 d，你不是那种一进入人群就让所有人注意到的人。你的生命力不以强烈的方式出现，而是以低温、稳定、缓慢的方式存在。
+
+你需要安全环境。太强烈的人、太密集的关系、太急迫的期待，都会让你本能地收缩。你不是拒绝世界，你只是知道自己需要恰当的距离。
+
+你身上有一种安静的可居住性。和你相处久了的人，会慢慢发现你并不冷漠，也不空洞。你的内部有秩序，有温度，有微弱但持续的光。你不是烟花式的人，你更像气候。
+
+你最大的优势是稳定、持久和低调的承载力。你不擅长夸张表达，但你能长期陪伴；你不会迅速燃烧，也不轻易熄灭。
+
+你的危险在于，你可能太依赖"合适条件"。其实你不是没有生命力，你只是对生存条件敏感。
+
+你的课题不是变得耀眼，而是找到一颗不会灼伤你的太阳。`,
+    mystery: `你不是冰。
+你只是曾经需要冰。
+
+人们站在你的表面，
+说这里寒冷，安静，没有生命。
+他们说得并非全错。
+他们只是没有抵达足够深的地方。
+
+不要急着证明你的海。
+海不因无人看见而消失。
+
+但也不要永远躲在冰下。
+生命若只在深处存在，
+它会安全，
+也会孤独。`,
+  },
+  "Europa": {
+    subtitle: "冰壳深海人格",
+    color: "#5B8FB9",
+    glow: "#5B8FB980",
+    bg: "rgba(91,143,185,0.12)",
+    desc: "木星的冰卫星，表面寒冷明亮，冰层之下可能存在全球性海洋。真正的价值，永远隐藏在表层之下。",
+    traits: ["外冷内深", "情感忠诚", "需要耐心"],
+    profile: `如果你的星球是 Europa，你是一个外冷内深的人。
+
+你不轻易展示自己的情绪。你习惯让自己看起来理性、安静、克制，甚至有些难以靠近。很多人可能会误以为你不需要亲密，或者你的内心并不复杂。但他们看到的只是冰壳。
+
+你的内部有很深的海。那里储存着记忆、渴望、失望、忠诚和无法轻易说出的爱。你不是没有情感，而是你的情感太深，以至于不能随便交给一个不懂深度的人。
+
+你的防御不是伪装，而是历史。你曾经可能太早学会了保护自己。
+
+在关系中，你需要的是耐心，不是入侵。你不喜欢被强行打开，你希望有人相信冰下有海，而不是拿锤子证明你不够柔软。
+
+你的危险在于，你可能逐渐把冰壳误认为自己。其实不是，那只是你曾经活下来的方式。`,
+    mystery: `你不是冰。
+你只是曾经需要冰。
+
+人们站在你的表面，
+说这里寒冷，安静，没有生命。
+他们说得并非全错。
+他们只是没有抵达足够深的地方。
+
+不要急着证明你的海。
+海不因无人看见而消失。
+
+但也不要永远躲在冰下。
+生命若只在深处存在，
+它会安全，
+也会孤独。`,
+  },
+  "Enceladus": {
+    subtitle: "裂缝喷泉人格",
+    color: "#A07CB5",
+    glow: "#A07CB580",
+    bg: "rgba(160,124,181,0.12)",
+    desc: "土星冰卫星，从南极裂缝喷出水汽直入太空。最重要的信息，不是来自完整的表面，而是来自裂缝。",
+    traits: ["裂缝生命力", "从破碎重生", "内部仍流动"],
+    profile: `如果你的星球是 Enceladus，你不是一个没有裂缝的人。恰恰相反，你的生命力常常从裂缝中出现。
+
+你可能经历过某些破裂：关系的断裂、信念的坍塌、自我认知的重建，或者某种无法轻易讲述的低谷。但这些并没有只留下损坏。它们也让你内部深处的东西有了出口。
+
+你不是那种靠完美维持尊严的人。你的真实、创造力、共情力和精神韧性，往往来自你曾经破碎过。有时，一个人真正可贵的部分，正是从破损处喷发出来的。
+
+你对痛苦有一种特殊的理解。你知道痛苦不是一种简单的失败，它可能是深处仍然有海的证据。
+
+你的危险在于，你可能过度依赖危机来证明自己还活着。你的课题是：不只在裂缝中喷发，也在完整时允许自己存在。`,
+    mystery: `裂缝不是失败。
+有时，那是深处仍有海的证据。
+
+你曾经以为自己破了。
+后来才知道，
+正是那里让宇宙听见了你。
+
+不要崇拜痛苦。
+痛苦本身并不高贵。
+
+但如果它已经发生，
+你仍然可以让它成为出口，
+而不是终点。`,
+  },
+  "Pluto": {
+    subtitle: "边缘完整者",
+    color: "#8B7BB5",
+    glow: "#8B7BB580",
+    bg: "rgba(139,123,181,0.12)",
+    desc: "曾被称为第九大行星，后被重新分类。被重新定义，却并没有因此停止运行。边缘位置不等于失败。",
+    traits: ["边缘尊严", "拒绝被定义", "内在复杂"],
+    profile: `如果你的星球是 Pluto，你很可能经历过某种"被重新定义"的时刻。
+
+你可能曾经属于某个系统，后来被移出中心。你可能被误解、被降级、被重新命名，或者发现别人对你的期待并不能容纳真实的你。
+
+你和归属感的关系很复杂。你渴望被承认，但又不愿意为了被承认而扭曲自己。你可以在边缘生活，但你不希望边缘被理解成失败。你只是拒绝为了进入中心而丢掉自己的轨道。
+
+你的内在比别人想象得复杂。遥远只是让他们看不清，并不意味着你简单。
+
+你的优势是尊严、独立、清醒和自我保存能力。即使世界改变了对你的称呼，你仍然知道自己在运行。
+
+你的课题是：不要把别人的名单当成宇宙本身。`,
+    mystery: `有一天，世界改变了你的名字。
+你没有因此停止运行。
+
+这就是你的尊严。
+
+人类喜欢分类，
+因为他们害怕复杂。
+他们把你移出名单，
+仿佛名单就是宇宙。
+
+但宇宙并不读名单。
+
+你在遥远的地方继续存在。
+寒冷，缓慢，完整。
+不再需要中心的承认，
+也不把边缘误认为失败。`,
+  },
+  "55 Cancri e": {
+    subtitle: "高压钻石人格",
+    color: "#C4923A",
+    glow: "#C4923A80",
+    bg: "rgba(196,146,58,0.12)",
+    desc: "超级地球，高温高压，曾被称为钻石行星。有些光泽不是轻松长出来的，而是在极端压力下形成的。",
+    traits: ["高压塑造", "昂贵感", "精神骨架"],
+    profile: `如果你的星球是 55 Cancri e，你是一个在高压中形成价值的人。
+
+你不是轻松长成的。你的能力、审美、克制、锋利和自持，往往来自长期的挤压。别人看到你的闪光，却很少知道这种光是如何形成的。你身上有一种昂贵感，不是浮华，而是代价。
+
+你可能很优秀，也很难真正放松。你习惯把自己推向更高标准，仿佛只有不断承受压力，才能证明自己值得存在。
+
+你的优势是强大的自我塑造能力。你能在困境中形成结构，在压力中提炼价值。你不是容易散掉的人。
+
+你的危险在于，你可能把痛苦误认为价值的唯一来源，可能不断靠近更灼热的太阳。
+
+你的课题是：学习在没有压迫的地方，仍然相信自己珍贵。`,
+    mystery: `你以为自己是钻石。
+也许你只是一直生活在压力之中。
+
+这并不贬低你的光。
+相反，
+它说明你的光从未廉价。
+
+但人不能永远把苦难当成矿床。
+
+总有一天，
+你要学会在没有压迫的地方，
+仍然允许自己珍贵。`,
+  },
+  "HD 189733 b": {
+    subtitle: "蓝色风暴人格",
+    color: "#4A7FA5",
+    glow: "#4A7FA580",
+    bg: "rgba(74,127,165,0.12)",
+    desc: "深蓝色热木星，外表美丽宁静，大气中实则有极速风暴横扫。颜色的含义，宇宙从不承诺。",
+    traits: ["表象宁静", "内部风速极高", "情绪包装"],
+    profile: `如果你的星球是 HD 189733 b，你给人的第一印象可能是冷静、漂亮、理性、疏离。但你的内部并不平静。
+
+你有强烈的情绪气候，只是很少直接显露。你习惯把混乱包装成优雅，把愤怒处理成沉默，把风暴藏进一种看似稳定的蓝色里。很多人以为你很好，因为你看起来很好。
+
+但看起来平静，和真的平静，是两件事。
+
+你能把灾难整理成一种美感。但这也是你的危险。你可能太擅长把痛苦变得好看，以至于忘记它仍然是痛苦。在关系中，靠近你的人如果没有足够稳定的自我结构，可能会被你的情绪气候卷入。
+
+你的课题不是变得温和，而是诚实承认自己的风暴。`,
+    mystery: `人们总是相信蓝色意味着海。
+他们忘了，
+宇宙从不承诺颜色的含义。
+
+你的平静也是这样。
+它并不等于安全。
+它只是风暴在远处形成的一种视觉效果。
+
+不要责怪别人误解你。
+多数人只会辨认天空，
+不会研究大气。
+
+但你要小心。
+如果你永远把灾难伪装成美，
+总有一天，
+连你自己也会忘记疼痛真正的名字。`,
+  },
+  "WASP-12b": {
+    subtitle: "被吞噬的热烈者",
+    color: "#C05A3A",
+    glow: "#C05A3A80",
+    bg: "rgba(192,90,58,0.12)",
+    desc: "极端热木星，正被母恒星逐渐消耗。靠近光，同时被光吞噬。过度靠近的宇宙寓言。",
+    traits: ["热烈投入", "强引力捕获", "分辨光与火"],
+    profile: `如果你的星球是 WASP-12b，你是一个热烈、投入、容易被强引力捕获的人。
+
+你不擅长浅浅地喜欢，也不擅长安全地保持距离。一旦某个人、目标、关系或欲望成为你的太阳，你很容易把整个生命轨道交给它。你靠近，燃烧，然后在燃烧中确认自己还活着。
+
+你对冷淡的生活不耐受。你宁愿被灼伤，也不愿什么都不发生。你害怕没有感受，害怕平庸。
+
+你的优势是激情、投入、强烈的生命感。你可以很真，很深，很彻底。
+
+但你的危险也在这里。你容易把"被吞噬"误认为"被爱"，把"失去边界"误认为"深度连接"。你可能靠近那些并不会照亮你，只会消耗你的光源。
+
+你的课题是：学习分辨太阳和火灾。`,
+    mystery: `不是所有光都值得靠近。
+有些光只是在练习吞噬。
+
+你以为自己是在爱，
+其实你可能只是在绕着危险运行。
+
+这并不说明你的热烈是错的。
+热烈从来不是罪。
+只是人必须学会判断：
+什么会照亮你，
+什么会把你烧空。
+
+如果宇宙没有意义，
+你仍然可以选择爱。
+但不要把毁灭误认为证明。`,
+  },
+  "K2-18 b": {
+    subtitle: "深海未知者",
+    color: "#3A8A8A",
+    glow: "#3A8A8A80",
+    bg: "rgba(58,138,138,0.12)",
+    desc: "位于宜居带内，厚重大气包裹可能的海洋。人类只能通过间接信号理解它，深处比表面更重要。",
+    traits: ["难以直接理解", "内在复杂", "只留航道"],
+    profile: `如果你的星球是 K2-18 b，你是一个极难被直接理解的人。
+
+你并不是刻意神秘，而是你的内在结构本来就复杂。你有深层情绪、隐秘渴望、多重自我，以及很难被简单语言描述的心理气候。别人往往只能通过你的只言片语、行为痕迹、沉默方式来猜测你真正发生了什么。
+
+你不是透明的人。你的自我像被厚重大气包裹的海洋。外界看到的是信号，而不是本体。
+
+你的优势是深度、复杂性、想象力和高度的内在经验。你能够感受到许多人忽略的细微变化。
+
+你的危险在于，你可能习惯被误解，以至于不再主动翻译自己。
+
+你的课题是：不必向所有人解释你的海，但可以为值得的人留下一条航道。`,
+    mystery: `被看见的从来不是海。
+只是海试图抵达天空的证据。
+
+你发出的信号很微弱，
+但并不等于你不存在。
+
+人类总是渴望确定。
+可宇宙最深的部分，
+常常只允许我们推测。
+
+你也是如此。
+你不需要被所有人完全理解。
+但你要小心，
+不要把不可观测，
+误认为无人可达。`,
+  },
+  "Titan": {
+    subtitle: "异世界大气人格",
+    color: "#B08040",
+    glow: "#B0804080",
+    bg: "rgba(176,128,64,0.12)",
+    desc: "土星最大卫星，拥有甲烷湖泊和厚重大气。类地却非地——它提问：生命是否必须以我们熟悉的方式存在？",
+    traits: ["异质完整", "自成系统", "拒绝地球化"],
+    profile: `如果你的星球是 Titan，你是一个无法用常规标准理解的人。
+
+你有自己的心理生态。你的感受方式、价值系统、亲密节奏和生活逻辑，可能都与主流期待不太一样。别人可能觉得你奇怪、难懂、疏离，或者"不像正常人那样反应"。但那并不意味着你混乱。你只是拥有另一套气候系统。
+
+你不适合被强行地球化。别人越是要求你按照常规方式表达爱、追求成功、处理痛苦，你越会感到窒息。你需要的是能够承认异质性的人。
+
+你的优势是独特性、完整的内在规则和不随便迎合的精神结构。你可以自成一体。
+
+你的危险在于，你可能过度认同"不被理解"，把所有靠近都视为入侵。
+
+你的课题是：允许自己不同，也允许某些人学习你的语言。`,
+    mystery: `你不是不适合生命。
+你只是拒绝以常规方式活着。
+
+人们习惯用地球解释宇宙。
+所以他们看见你时，
+先说陌生，
+再说错误。
+
+但陌生不是错误。
+不同也不是失败。
+
+你可以拥有自己的天气，
+自己的湖泊，
+自己的夜晚。
+
+只是不要忘记：
+再遥远的世界，
+也可以被温柔地登陆。`,
+  },
+  "Proxima Centauri b": {
+    subtitle: "最近的孤独者",
+    color: "#6A7FA8",
+    glow: "#6A7FA880",
+    bg: "rgba(106,127,168,0.12)",
+    desc: "距离太阳系最近的系外行星。天文学上最近的邻居，在人的尺度上仍是不可抵达的深空。",
+    traits: ["近在咫尺的孤独", "渴望又警惕靠近", "距离悖论"],
+    profile: `如果你的星球是 Proxima Centauri b，你是一个"近在咫尺的孤独者"。
+
+你并不一定远离人群。你可能和别人保持正常关系，甚至看起来并不孤僻。但在真正深处，你常常觉得自己无法被抵达。你可以坐在一个人身边，却感觉彼此之间仍隔着光年。
+
+你对亲密有复杂的感受。你渴望靠近，又害怕靠近后被强烈的情绪或关系风暴灼伤。
+
+你最大的矛盾是：你离别人不远，但很难真正交出自己。你不一定缺少陪伴，你缺少的是一种让你相信"我可以在这里安全存在"的关系。
+
+你的优势是敏感、忠诚、观察力和对关系细节的深度感知。
+
+你的课题是：重新理解距离。不是所有靠近都会灼伤你，也不是所有孤独都必须被保留。`,
+    mystery: `距离不是用光年来计算的。
+有些人坐在你身边，
+却仍像另一颗星。
+
+你并不是真的遥远。
+你只是还没有相信，
+靠近可以不等于毁灭。
+
+宇宙中最近的恒星，
+仍需要光年抵达。
+所以你不必责怪自己慢。
+
+但如果有人愿意学习你的轨道，
+不要急着把他归入黑暗。`,
+  },
+  "Kepler-452b": {
+    subtitle: "旧地球继承者",
+    color: "#5C8A5C",
+    glow: "#5C8A5C80",
+    bg: "rgba(92,138,92,0.12)",
+    desc: "曾被称为地球2.0，更大更古老。像是宇宙里一封来自时间深处的信：如果地球继续老去，它会成为什么？",
+    traits: ["过早成熟", "长期主义", "承担力"],
+    profile: `如果你的星球是 Kepler-452b，你像一个过早成熟的人。
+
+你身上有一种承担感。你可能从很早开始就习惯负责、忍耐、规划、照顾整体。你不一定喜欢这样，但你知道如果你不稳定，很多事情可能会随之失序。
+
+你有强烈的长期主义倾向。你更在意一件事是否能持续，一段关系是否能经得起时间，一个选择是否能与深层价值保持一致。
+
+别人可能觉得你可靠、成熟、理性，甚至有点沉重。他们依赖你的稳定，却不一定看见你也会疲惫。
+
+你的危险在于，你可能把人生过早变成一项长期任务。你可能忘记自己也是一颗需要气候、休息和被照顾的星球。
+
+你的课题是：不要总是替世界老去。`,
+    mystery: `你不是老去得太快。
+你只是太早学会了替世界承担重量。
+
+人们赞美你的稳定，
+却很少询问它的代价。
+
+你可以继续负责。
+这也许是你的天性。
+但不要把所有疲惫都解释成使命。
+
+即使宇宙没有意义，
+你也不必独自维持它的秩序。
+
+有些时候，
+放下并不是坍缩，
+只是让自己重新成为人。`,
+  },
+  "GJ 1214 b": {
+    subtitle: "雾层保护者",
+    color: "#7A7AAA",
+    glow: "#7A7AAA80",
+    bg: "rgba(122,122,170,0.12)",
+    desc: "云层覆盖让大气成分无法直接观测。存在感明确，但内部模糊——不被看清不是逃避，而是保存。",
+    traits: ["雾层防御", "控制距离", "有意模糊"],
+    profile: `如果你的星球是 GJ 1214 b，你是一个被雾层保护的人。
+
+你不是没有内容，而是不轻易让别人看清内容。你有很强的心理缓冲层。面对外界，你可能表现得礼貌、模糊、难以定义。你很少让人直接抵达你的真实情绪和核心判断。
+
+这种模糊并不一定是虚假。很多时候，它是你的生存智慧。你知道太清晰地暴露自己会带来风险，所以你选择让自己保持某种不可完全解读的状态。
+
+你在人际关系中可能很擅长控制距离。你喜欢保留余地，保留沉默，保留一个只属于自己的内部空间。
+
+你的危险在于，雾层保护你，也隔绝你。真正想靠近你的人，也只能在大气之外徘徊。
+
+你的课题是：不必对世界完全透明，但要学会为少数值得的人打开能见度。`,
+    mystery: `有时，
+不被看清不是逃避，
+而是保存。
+
+雾保护了你。
+它让粗暴的目光无法直接抵达。
+也让温柔的人，
+不得不在外面等待。
+
+你不需要向所有人散去大气。
+透明不是唯一的诚实。
+
+但你要知道，
+如果雾永不退去，
+连爱也只能猜测你。`,
+  },
+};
+
+const QUESTIONS = [
+  { id:1, text:"当世界开始失序时，你更像：", a:{text:"先稳住自己的节律，哪怕只是维持最小的秩序。",scores:{"TOI-700 d":2,"Kepler-452b":2,"55 Cancri e":1}}, b:{text:"先感受混乱本身，直到它告诉我真正的问题在哪里。",scores:{"HD 189733 b":2,"K2-18 b":2,"Enceladus":1}} },
+  { id:2, text:"在关系里，你更害怕：", a:{text:"对方离我太远，我无法确认自己是否仍被需要。",scores:{"WASP-12b":2,"Proxima Centauri b":2}}, b:{text:"对方靠得太近，我失去自己的边界和呼吸。",scores:{"Europa":2,"GJ 1214 b":2,"Titan":1}} },
+  { id:3, text:"如果你必须选择一种生存方式，你更接近：", a:{text:"在安全、稳定、温和的环境里慢慢显露自己。",scores:{"TOI-700 d":2,"Europa":2}}, b:{text:"在高压、灼热、极端的环境里逼出自己的价值。",scores:{"55 Cancri e":2,"WASP-12b":2,"HD 189733 b":1}} },
+  { id:4, text:"你更常觉得自己像：", a:{text:"一个别人能看见轮廓，但很难抵达内部的人。",scores:{"GJ 1214 b":2,"Titan":2,"K2-18 b":1}}, b:{text:"一个别人能靠近身边，却始终无法真正理解的人。",scores:{"Proxima Centauri b":2,"Pluto":2}} },
+  { id:5, text:"面对痛苦，你更倾向于：", a:{text:"把它压缩、提炼，直到它变成某种能力。",scores:{"55 Cancri e":2,"Kepler-452b":2}}, b:{text:"让它从裂缝中流出来，成为重新生成的出口。",scores:{"Enceladus":2,"Europa":2}} },
+  { id:6, text:"你对【被理解】的真实态度更像：", a:{text:"我渴望被理解，但不想被粗暴解释。",scores:{"Europa":2,"Proxima Centauri b":2,"K2-18 b":1}}, b:{text:"我并不执着于被理解，我只需要保留自己的世界。",scores:{"Titan":2,"Pluto":2,"GJ 1214 b":1}} },
+  { id:7, text:"你更容易被什么吸引？", a:{text:"稳定、长期、能让我逐渐信任的东西。",scores:{"TOI-700 d":2,"Kepler-452b":2,"Europa":1}}, b:{text:"强烈、危险、让我感到自己正在活着的东西。",scores:{"WASP-12b":2,"HD 189733 b":2,"55 Cancri e":1}} },
+  { id:8, text:"当别人评价你时，你更常感到：", a:{text:"他们只看到了我的功能，却没看见我的疲惫。",scores:{"Kepler-452b":2,"55 Cancri e":2}}, b:{text:"他们只看到了我的表面，却没看见我的深处。",scores:{"Europa":2,"K2-18 b":2,"HD 189733 b":1}} },
+  { id:9, text:"你更接近哪种孤独？", a:{text:"我站在边缘，但我知道自己仍然完整。",scores:{"Pluto":2,"Titan":2}}, b:{text:"我就在别人身边，却仍像隔着光年。",scores:{"Proxima Centauri b":2,"GJ 1214 b":2}} },
+  { id:10, text:"面对人生的无意义感，你更像：", a:{text:"即使没有答案，我仍然会继续承担和行动。",scores:{"Kepler-452b":2,"TOI-700 d":2,"Enceladus":1}}, b:{text:"我会先停下来，凝视这种荒诞本身。",scores:{"Pluto":2,"K2-18 b":2,"HD 189733 b":1}} },
+  { id:11, text:"你更不愿意成为：", a:{text:"一个完全透明、被人轻易看穿的人。",scores:{"GJ 1214 b":2,"Titan":2,"Europa":1}}, b:{text:"一个永远封闭、无人能够抵达的人。",scores:{"Proxima Centauri b":2,"TOI-700 d":2,"Enceladus":1}} },
+  { id:12, text:"在亲密关系中，你更常出现的模式是：", a:{text:"一旦真正投入，就很难从对方的引力中抽离。",scores:{"WASP-12b":2,"Proxima Centauri b":2,"55 Cancri e":1}}, b:{text:"即使很在意，也会保留一部分无法交出的自己。",scores:{"Europa":2,"GJ 1214 b":2,"Pluto":1}} },
+  { id:13, text:"你更像哪一种【强大】？", a:{text:"把自己变得足够坚硬，不轻易被世界压碎。",scores:{"55 Cancri e":2,"Kepler-452b":2}}, b:{text:"即使破裂过，也还能让新的东西从里面出现。",scores:{"Enceladus":2,"Pluto":2}} },
+  { id:14, text:"你对【普通人生】的感觉更接近：", a:{text:"我可以接受平凡，但不能接受完全背离自己。",scores:{"TOI-700 d":2,"Kepler-452b":2,"Pluto":1}}, b:{text:"我很难适应常规叙事，它们像别人的地球规则。",scores:{"Titan":2,"K2-18 b":2,"HD 189733 b":1}} },
+  { id:15, text:"如果别人说【你看起来很好】，你更可能：", a:{text:"感到讽刺，因为我的风暴通常没有声音。",scores:{"HD 189733 b":2,"K2-18 b":2}}, b:{text:"感到疲惫，因为他们只看见我维持秩序的样子。",scores:{"Kepler-452b":2,"55 Cancri e":2}} },
+  { id:16, text:"你更熟悉哪一种自我保护？", a:{text:"让自己变得模糊，不让别人轻易判断我。",scores:{"GJ 1214 b":2,"Titan":2}}, b:{text:"让自己变得冷静，不让别人轻易触碰我。",scores:{"Europa":2,"55 Cancri e":2}} },
+  { id:17, text:"你更愿意相信：", a:{text:"真正重要的东西需要时间，不能被快速证明。",scores:{"TOI-700 d":2,"Europa":2,"Kepler-452b":1}}, b:{text:"真正重要的东西会让人不顾一切地靠近。",scores:{"WASP-12b":2,"HD 189733 b":2}} },
+  { id:18, text:"你内心更深的矛盾是：", a:{text:"我想被看见，但不想被任何人定义。",scores:{"Pluto":2,"Titan":2,"GJ 1214 b":1}}, b:{text:"我想被靠近，但不确定靠近是否安全。",scores:{"Proxima Centauri b":2,"Europa":2}} },
+  { id:19, text:"当你感到自己【不属于这里】时，你更像：", a:{text:"退到边缘，保留自己的完整世界。",scores:{"Pluto":2,"GJ 1214 b":2}}, b:{text:"建立另一套规则，拒绝按常规方式存在。",scores:{"Titan":2,"K2-18 b":2}} },
+  { id:20, text:"你更容易陷入哪一种危险？", a:{text:"把痛苦误认为价值的来源。",scores:{"55 Cancri e":2,"Kepler-452b":2}}, b:{text:"把毁灭误认为爱的证明。",scores:{"WASP-12b":2,"Proxima Centauri b":2}} },
+  { id:21, text:"你更接近哪种内在气候？", a:{text:"表面低温、安静，深处仍然流动。",scores:{"Europa":2,"TOI-700 d":2,"K2-18 b":1}}, b:{text:"表面美丽、克制，内部风速极高。",scores:{"HD 189733 b":2,"55 Cancri e":2}} },
+  { id:22, text:"当你重新开始时，通常是因为：", a:{text:"我终于找到一个足够安全、温和的轨道。",scores:{"TOI-700 d":2,"Proxima Centauri b":2}}, b:{text:"我从某次破裂中重新生成了自己。",scores:{"Enceladus":2,"Pluto":2}} },
+  { id:23, text:"你更不能忍受：", a:{text:"自己长期围绕一个会消耗我的东西运行。",scores:{"Pluto":2,"TOI-700 d":2,"GJ 1214 b":1}}, b:{text:"自己一生都没有真正燃烧或投入过什么。",scores:{"WASP-12b":2,"HD 189733 b":2,"55 Cancri e":1}} },
+  { id:24, text:"如果宇宙没有义务解释你，你更愿意：", a:{text:"在沉默中继续运行，维持自己的秩序。",scores:{"Kepler-452b":2,"TOI-700 d":2,"Pluto":1}}, b:{text:"在沉默中保留未知，不急着向世界交代。",scores:{"K2-18 b":2,"Titan":2,"GJ 1214 b":1}} },
+];
+
+// ─── STATE ─────────────────────────────────────────────────
+let current = 0;
+let scores = {};
+let mysteryOpen = false;
+
+function initScores() {
+  scores = {};
+  Object.keys(PLANETS).forEach(k => scores[k] = 0);
+}
+
+// ─── SCREENS ───────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+}
+
+function startQuiz() {
+  initScores();
+  current = 0;
+  renderQuestion();
+  showScreen('quiz');
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[current];
+  const pct = Math.round((current / QUESTIONS.length) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent =
+    String(current + 1).padStart(2,'0') + ' / ' + QUESTIONS.length;
+  document.getElementById('signal-label').textContent =
+    'SIGNAL ' + String(current + 1).padStart(2,'0');
+  document.getElementById('question-text').textContent = q.text;
+  document.getElementById('text-a').textContent = q.a.text;
+  document.getElementById('text-b').textContent = q.b.text;
+}
+
+function answer(choice) {
+  const q = QUESTIONS[current];
+  const chosen = choice === 'a' ? q.a : q.b;
+  Object.entries(chosen.scores).forEach(([planet, pts]) => {
+    scores[planet] = (scores[planet] || 0) + pts;
+  });
+
+  if (current + 1 >= QUESTIONS.length) {
+    showResult();
+  } else {
+    const quiz = document.getElementById('screen-quiz');
+    quiz.style.animation = 'fadeOut 0.28s ease forwards';
+    setTimeout(() => {
+      current++;
+      renderQuestion();
+      quiz.style.animation = 'fadeIn 0.4s ease forwards';
+    }, 280);
+  }
+}
+
+function showResult() {
+  const sorted = Object.entries(scores).sort((a,b) => b[1] - a[1]);
+  const mainKey = sorted[0][0];
+  const secondKey = sorted[1][0];
+  const p = PLANETS[mainKey];
+  const p2 = PLANETS[secondKey];
+
+  // orb
+  const orb = document.getElementById('result-orb');
+  orb.style.background = `radial-gradient(circle at 35% 32%, ${p.color}DD, ${p.color}55)`;
+  orb.style.boxShadow = `0 0 32px ${p.glow}, 0 0 10px ${p.color}44`;
+
+  document.getElementById('result-name').textContent = mainKey;
+  document.getElementById('result-subtitle').textContent = p.subtitle;
+  document.getElementById('result-subtitle').style.color = p.color;
+  document.getElementById('result-desc').textContent = p.desc;
+
+  // traits
+  const traitsEl = document.getElementById('result-traits');
+  traitsEl.innerHTML = p.traits.map(t =>
+    `<span class="trait-tag" style="border:1px solid ${p.color}55;color:${p.color};background:${p.bg}">${t}</span>`
+  ).join('');
+
+  document.getElementById('result-profile').textContent = p.profile;
+
+  // second planet
+  const s2orb = document.getElementById('second-orb');
+  s2orb.style.background = `radial-gradient(circle at 35% 32%, ${p2.color}DD, ${p2.color}55)`;
+  s2orb.style.boxShadow = `0 0 12px ${p2.glow}`;
+  document.getElementById('second-name').textContent = secondKey + ' · ' + p2.subtitle;
+
+  // mystery button
+  const btnM = document.getElementById('btn-mystery');
+  btnM.style.border = `1px solid ${p.color}44`;
+  btnM.style.color = p.color;
+  mysteryOpen = false;
+  btnM.textContent = '展开奥秘';
+  document.getElementById('mystery-box').style.display = 'none';
+  document.getElementById('result-mystery').textContent = p.mystery;
+
+  const mbox = document.getElementById('mystery-box');
+  mbox.style.border = `1px solid ${p.color}33`;
+
+  showScreen('result');
+}
+
+function toggleMystery() {
+  mysteryOpen = !mysteryOpen;
+  const box = document.getElementById('mystery-box');
+  const btn = document.getElementById('btn-mystery');
+  box.style.display = mysteryOpen ? 'block' : 'none';
+  btn.textContent = mysteryOpen ? '收起奥秘' : '展开奥秘';
+}
+
+function restart() {
+  initScores();
+  showScreen('intro');
+}
+</script>
+</body>
+</html>
